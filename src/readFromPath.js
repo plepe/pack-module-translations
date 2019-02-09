@@ -11,7 +11,7 @@ module.exports = function readFromPath (path, options, callback) {
 
     async.each(files, (file, done) => {
       if (file.match(/^\./) || (!file.match(/\.json$/))) {
-        return
+        return done()
       }
 
       let m = file.match(/^([a-z]{2,3}(\-[a-z]+)?)\.json$/)
@@ -29,6 +29,6 @@ module.exports = function readFromPath (path, options, callback) {
 
         done()
       })
-    }, (err) => { callback(err, result) })
+    }, (err) => callback(err, result))
   })
 }
