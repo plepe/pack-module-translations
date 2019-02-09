@@ -4,6 +4,7 @@ const fs = require('fs')
 
 const copyLangStr = require('./copyLangStr')
 const applyFallbackLanguages = require('./applyFallbackLanguages')
+const readFromPath = require('./readFromPath')
 
 function checkPrefixModules (path, callback) {
   fs.readdir(path, { withFileTypes: true }, (err, files) => {
@@ -60,32 +61,14 @@ function checkModule (path, callback) {
           return done()
         }
 
-        fs.readdir(path + '/' + mod.translationPath, (err, files) => {
+        readFromPath(path + '/' + mod.translationPath, {}, (err, strings) => {
           if (err) {
             return done(err)
           }
 
-          async.each(files, (file, done) => {
-            if (file.match(/^\./) || (!file.match(/\.json$/))) {
-              return
-            }
+          thisModuleStrings = strings
 
-            let m = file.match(/^([a-z]{2,3}(\-[a-z]+)?)\.json$/)
-            if (!m) {
-              return done()
-            }
-            let lang = m[1]
-
-            fs.readFile(path + '/' + mod.translationPath + '/' + file, (err, content) => {
-              if (err) {
-                return done(err)
-              }
-
-              thisModuleStrings[lang] = JSON.parse(content)
-
-              done()
-            })
-          }, done)
+          done()
         })
       })
     }
