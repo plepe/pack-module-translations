@@ -3,6 +3,7 @@ const async = require('async')
 const fs = require('fs')
 
 const copyLangStr = require('./copyLangStr')
+const applyFallbackLanguages = require('./applyFallbackLanguages')
 
 function checkPrefixModules (path, callback) {
   fs.readdir(path, { withFileTypes: true }, (err, files) => {
@@ -102,6 +103,8 @@ module.exports = function run () {
     if (err) {
       return console.log(err)
     }
+
+    applyFallbackLanguages(result)
 
     async.eachOf(result, (str, lang, done) => {
       fs.writeFile('dist/' + lang + '.json', JSON.stringify(str), done)
