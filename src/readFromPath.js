@@ -14,7 +14,7 @@ module.exports = function readFromPath (path, options, callback) {
         return done()
       }
 
-      let m = file.match(/^([a-z]{2,3}(\-[a-z]+)?)\.json$/)
+      let m = file.match(/^([a-z]{2,3}(-[a-z]+)?)\.json$/)
       if (!m) {
         return done()
       }

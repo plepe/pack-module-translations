@@ -1,10 +1,9 @@
-const copyLangStr = require('./copyLangStr')
 const fallback = require('./fallback.json')
 
 /**
  * copy all strings which are missing in the current language from the fallback language
  */
-module.exports = function applyFallbackLanguages (data, options={}) {
+module.exports = function applyFallbackLanguages (data, options = {}) {
   let done = {}
 
   for (let lang in data) {

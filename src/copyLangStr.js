@@ -15,5 +15,3 @@ module.exports = function copyLangStr (from, to) {
     }
   }
 }
-
-

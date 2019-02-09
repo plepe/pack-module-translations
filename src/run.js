@@ -1,4 +1,3 @@
-const child_process = require('child_process')
 const async = require('async')
 const fs = require('fs')
 
@@ -8,6 +7,10 @@ const readFromPath = require('./readFromPath')
 
 function checkPrefixModules (path, callback) {
   fs.readdir(path, { withFileTypes: true }, (err, files) => {
+    if (err) {
+      return callback(err)
+    }
+
     async.each(files, (file, done) => {
       if (file.name.match(/^\./)) {
         return done()
@@ -26,6 +29,10 @@ function checkModule (path, callback) {
     // Step 1: descend into sub modules
     (done) => {
       fs.readdir(path + '/node_modules', { withFileTypes: true }, (err, files) => {
+        if (err) {
+          return done(err)
+        }
+
         async.each(files, (file, done) => {
           if (file.name.match(/^\./)) {
             return done()
