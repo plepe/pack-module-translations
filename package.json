@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "async": "^2.6.1"
+  },
+  "bin": {
+    "pack-module-translations": "./src/run.js"
   }
 }

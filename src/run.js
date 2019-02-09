@@ -97,18 +97,20 @@ function checkModule (path, callback) {
   })
 }
 
-checkModule('.', (err, result) => {
-  if (err) {
-    return console.log(err)
-  }
-
-  async.eachOf(result, (str, lang, done) => {
-    fs.writeFile('dist/' + lang + '.json', JSON.stringify(str), done)
-  }, (err) => {
+module.exports = function run () {
+  checkModule('.', (err, result) => {
     if (err) {
       return console.log(err)
     }
 
-    console.log('Done')
+    async.eachOf(result, (str, lang, done) => {
+      fs.writeFile('dist/' + lang + '.json', JSON.stringify(str), done)
+    }, (err) => {
+      if (err) {
+        return console.log(err)
+      }
+
+      console.log('Done')
+    })
   })
-})
+}
