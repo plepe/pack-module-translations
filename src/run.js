@@ -61,15 +61,22 @@ function checkModule (path, callback) {
           return done()
         }
 
-        readFromPath(path + '/' + mod.translationPath, {}, (err, strings) => {
-          if (err) {
-            return done(err)
-          }
+        let translationPaths = mod.translationPath
+        if (!Array.isArray(mod.translationPath)) {
+          translationPaths = [ translationPaths ]
+        }
 
-          thisModuleStrings = strings
+        async.each(translationPaths, (translationPath, done) => {
+          readFromPath(path + '/' + translationPath, {}, (err, strings) => {
+            if (err) {
+              return done(err)
+            }
 
-          done()
-        })
+            copyLangStr(strings, thisModuleStrings)
+
+            done()
+          })
+        }, done)
       })
     }
   ], (err) => {
