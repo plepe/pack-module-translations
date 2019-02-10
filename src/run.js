@@ -25,56 +25,52 @@ function checkModule (path, callback) {
   let allStrings = {}
   let thisModuleStrings = {}
 
-  async.parallel([
-    // Step 1: descend into sub modules
-    (done) => {
-      fs.readdir(path + '/node_modules', { withFileTypes: true }, (err, files) => {
-        if (err) {
-          // it's ok, if a module has no sub-modules - ignore
-          if (err.code === 'ENOENT') {
-            return done()
-          }
+  fs.readFile(path + '/package.json', (err, module) => {
+    module = JSON.parse(module)
 
-          return done(err)
-        }
-
-        async.each(files, (file, done) => {
-          if (file.name.match(/^\./)) {
-            return done()
-          }
-
-          if (file.name.match(/^@/)) {
-            return checkPrefixModules(path + '/node_modules/' + file.name, done)
-          }
-
-          let subPath = path + '/node_modules/' + file.name
-          checkModule(subPath, (err, result) => {
-            if (err) {
-              return done(err)
+    async.parallel([
+      // Step 1: descend into sub modules
+      (done) => {
+        fs.readdir(path + '/node_modules', { withFileTypes: true }, (err, files) => {
+          if (err) {
+            // it's ok, if a module has no sub-modules - ignore
+            if (err.code === 'ENOENT') {
+              return done()
             }
 
-            copyLangStr(result, allStrings)
+            return done(err)
+          }
 
-            done()
-          })
+          async.each(files, (file, done) => {
+            if (file.name.match(/^\./)) {
+              return done()
+            }
+
+            if (file.name.match(/^@/)) {
+              return checkPrefixModules(path + '/node_modules/' + file.name, done)
+            }
+
+            let subPath = path + '/node_modules/' + file.name
+            checkModule(subPath, (err, result) => {
+              if (err) {
+                return done(err)
+              }
+
+              copyLangStr(result, allStrings)
+
+              done()
+            })
+          }, done)
         }, done)
-      }, done)
-    },
-    // Step 2: from this module, load all translations
-    (done) => {
-      fs.readFile(path + '/package.json', (err, mod) => {
-        if (err) {
-          return done(err)
-        }
-
-        mod = JSON.parse(mod)
-
-        if (!('translationPath' in mod)) {
+      },
+      // Step 2: from this module, load all translations
+      (done) => {
+        if (!('translationPath' in module)) {
           return done()
         }
 
-        let translationPaths = mod.translationPath
-        if (!Array.isArray(mod.translationPath)) {
+        let translationPaths = module.translationPath
+        if (!Array.isArray(module.translationPath)) {
           translationPaths = [ translationPaths ]
         }
 
@@ -89,14 +85,14 @@ function checkModule (path, callback) {
             done()
           })
         }, done)
-      })
-    }
-  ], (err) => {
-    // Step 3: merge strings from sub modules with current module
-    copyLangStr(thisModuleStrings, allStrings)
+      }
+    ], (err) => {
+      // Step 3: merge strings from sub modules with current module
+      copyLangStr(thisModuleStrings, allStrings)
 
-    // Finished!
-    callback(err, allStrings)
+      // Finished!
+      callback(err, allStrings)
+    })
   })
 }
 
