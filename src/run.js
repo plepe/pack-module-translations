@@ -25,32 +25,15 @@ function checkModule (path, callback) {
   let allStrings = {}
   let thisModuleStrings = {}
 
+  console.log(path)
   fs.readFile(path + '/package.json', (err, module) => {
     module = JSON.parse(module)
 
     async.parallel([
       // Step 1: descend into sub modules
       (done) => {
-        fs.readdir(path + '/node_modules', { withFileTypes: true }, (err, files) => {
-          if (err) {
-            // it's ok, if a module has no sub-modules - ignore
-            if (err.code === 'ENOENT') {
-              return done()
-            }
-
-            return done(err)
-          }
-
-          async.each(files, (file, done) => {
-            if (file.name.match(/^\./)) {
-              return done()
-            }
-
-            if (file.name.match(/^@/)) {
-              return checkPrefixModules(path + '/node_modules/' + file.name, done)
-            }
-
-            let subPath = path + '/node_modules/' + file.name
+        async.eachOf(module.dependencies, (version, dependency, done) => {
+            let subPath = path + '/node_modules/' + dependency
             checkModule(subPath, (err, result) => {
               if (err) {
                 return done(err)
@@ -60,7 +43,6 @@ function checkModule (path, callback) {
 
               done()
             })
-          }, done)
         }, done)
       },
       // Step 2: from this module, load all translations
