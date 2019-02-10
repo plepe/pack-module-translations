@@ -30,6 +30,11 @@ function checkModule (path, callback) {
     (done) => {
       fs.readdir(path + '/node_modules', { withFileTypes: true }, (err, files) => {
         if (err) {
+          // it's ok, if a module has no sub-modules - ignore
+          if (err.code === 'ENOENT') {
+            return done()
+          }
+
           return done(err)
         }
 
